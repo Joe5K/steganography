@@ -136,7 +136,7 @@ class Steganographer:
             return "Steganografia nedetegovana"
 
     # a function that detects steganography
-    def detect_steganography(self, threshold) -> str:  # bonus konvoluce/ina metoda
+    def detect_steganography(self) -> str:  # bonus konvoluce/ina metoda
         width, height = self.image.size
 
         def get_near_coords(x, y):
@@ -161,10 +161,10 @@ class Steganographer:
                         near_pixel = (near_pixel,)
 
                     for this_color, near_color in zip(this_pixel, near_pixel):
-                        if 1 <= abs(this_color - near_color) <= 2:
+                        if this_color & 254 == near_color & 254 and this_color & 1 != near_color & 1:
                             score += 1
 
-                    if score >= threshold*len(this_pixel):
+                    if score >= 2:
                         return f"Steganografia detegovana na suradniciach {x}x{y}"
         return "Steganografia nedetegovana"
 
@@ -191,7 +191,6 @@ elif func == "2":
 elif func == "3":
     print(steganographer.decrypt())
 elif func == "4":
-    threshold = input("Vložte threshold <2;7>. So klesanúcim thresholdom sa zvyšuje citlivosť, ale stúpa šanca na falošnú detekciu.\n")
-    print(steganographer.detect_steganography(int(threshold)))
+    print(steganographer.detect_steganography())
 else:
     print("Neplatný vstup:")
