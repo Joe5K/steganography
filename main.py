@@ -101,30 +101,35 @@ class Steganographer:
                     string = ""
         string_generator = get_strings()
 
-        type = next(chars_generator)
+        try:
+            type = next(chars_generator)
 
-        if type == "0":
-            length = int(next(string_generator))
-            text = ""
-            for letter in chars_generator:
-                text += letter
-                if len(text) == length:
-                    return f"Decryptovany text: {text}"
+            if type == "0":
+                length = int(next(string_generator))
+                text = ""
+                for letter in chars_generator:
+                    text += letter
+                    if len(text) == length:
+                        return f"Decryptovany text: {text}"
 
-        elif type == "1":
-            filename = next(string_generator)
-            length = int(next(string_generator))
-            bits = ""
-            for bit in bits_generator:
-                bits += str(bit)
-                if len(bits) == length:
-                    break
+            elif type == "1":
+                filename = next(string_generator)
+                length = int(next(string_generator))
+                bits = ""
+                for bit in bits_generator:
+                    bits += str(bit)
+                    if len(bits) == length:
+                        break
 
-            bytes = re.findall(r'\d{1,8}', bits)
-            bytes = [int(i, 2) for i in bytes]
-            with open(filename, "wb") as writer:
-                writer.write(bytearray(bytes))
-            return f"Decryptovany subor {filename} bol ulozeny."
+                bytes = re.findall(r'\d{1,8}', bits)
+                bytes = [int(i, 2) for i in bytes]
+                with open(filename, "wb") as writer:
+                    writer.write(bytearray(bytes))
+                return f"Decryptovany subor {filename} bol ulozeny."
+            else:
+                raise Exception()
+        except:
+            return "Steganografia nedetegovana"
 
     def detect_steganography(self, threshold) -> str:  # bonus konvoluce/ina metoda
         width, height = self.image.size
@@ -154,7 +159,7 @@ class Steganographer:
                         if 1 <= abs(this_color - near_color) <= 2:
                             score += 1
 
-                    if score >= threshold:
+                    if score >= threshold*len(this_pixel):
                         return f"Steganografia detegovana na suradniciach {x}x{y}"
         return "Steganografia nedetegovana"
 
@@ -187,7 +192,7 @@ elif func == "2":
 elif func == "3":
     print(steganographer.decrypt())
 elif func == "4":
-    threshold = input("Vložte threshold 2-8. So zväčšujúcim sa thresholdom klesá presnosť detekcie a zároveň aj šanca na falošnú detekciu.\n")
+    threshold = input("Vložte threshold <2;7>. So klesanúcim thresholdom sa zvyšuje citlivosť, ale stúpa šanca na falošnú detekciu.\n")
     print(steganographer.detect_steganography(int(threshold)))
 else:
     print("Neplatný vstup:")
