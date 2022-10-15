@@ -126,8 +126,39 @@ class Steganographer:
                 writer.write(bytearray(bytes))
             return f"Decryptovany subor {filename} bol ulozeny."
 
-    def detect_steganography(self) -> bool:  # bonus konvoluce/ina metoda
-        pass
+    def detect_steganography(self, threshold) -> str:  # bonus konvoluce/ina metoda
+        width, height = self.image.size
+
+        def get_near_coords(x, y):
+            coords = []
+            for new_x, new_y in ((x-1, y-1), (x-1, y), (x, y-1), (x+1, y-1), (x-1, y+1), (x+1, y), (x, y+1), (x+1, y+1)):
+                if 0 <= new_x < width and 0 <= new_y < height:
+                    coords.append((new_x, new_y))
+            return coords
+
+        def get_near_pixels(x, y):
+            return map(self.image.getpixel, get_near_coords(x, y))
+
+        for y in range(height):
+            for x in range(width):
+                near_pixels = get_near_pixels(x, y)
+                this_pixel = self.image.getpixel((x, y))
+                if not isinstance(this_pixel, tuple):
+                    this_pixel = (this_pixel,)
+                score = 0
+                for near_pixel in near_pixels:
+                    if not isinstance(near_pixel, tuple):
+                        near_pixel = (near_pixel,)
+
+                    for this_color, near_color in zip(this_pixel, near_pixel):
+                        if 1 <= abs(this_color - near_color) <= 2:
+                            score += 1
+
+                    if score >= threshold:
+                        return f"Steganografia detegovana na suradniciach {x}x{y}"
+        return "Steganografia nedetegovana"
+
+
 
     @staticmethod
     def read_file_binary(filename: str) -> list[bytes]:
@@ -156,6 +187,7 @@ elif func == "2":
 elif func == "3":
     print(steganographer.decrypt())
 elif func == "4":
-    pass
+    threshold = input("Vložte threshold 2-8. So zväčšujúcim sa thresholdom klesá presnosť detekcie a zároveň aj šanca na falošnú detekciu.\n")
+    print(steganographer.detect_steganography(int(threshold)))
 else:
     print("Neplatný vstup:")
