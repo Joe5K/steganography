@@ -8,12 +8,14 @@ class Steganographer:
     def __init__(self, image_filename: str):
         self.image = Image.open(image_filename)
 
+    # a function that encrypts text
     def encrypt_text(self, text: str) -> Image:
         text = f"{0}{len(text)};{text}"
         binary_data = ''.join(format(ord(i), '08b') for i in text)
 
-        self.write_binary(binary_data)
+        self._write_binary(binary_data)
 
+    # a function that encrypts file
     def encrypt_file(self, filename: str) -> Image:
         with open(filename, "rb") as reader:
             data = reader.read()
@@ -30,9 +32,10 @@ class Steganographer:
 
         binary_data = binary_header + binary_data
 
-        self.write_binary(binary_data)
+        self._write_binary(binary_data)
 
-    def write_binary(self, binary_data):
+    # a function that writes binary data to image
+    def _write_binary(self, binary_data):
         width, height = self.image.size
         total_space = width * height * len("rgb") - self.MAX_HEADER_LENGTH
         while len(binary_data) > total_space - 1:
@@ -73,6 +76,7 @@ class Steganographer:
             if finished:
                 break
 
+    # a function that decrypts images
     def decrypt(self) -> str:
         def get_bits():
             width, height = self.image.size
@@ -131,6 +135,7 @@ class Steganographer:
         except:
             return "Steganografia nedetegovana"
 
+    # a function that detects steganography
     def detect_steganography(self, threshold) -> str:  # bonus konvoluce/ina metoda
         width, height = self.image.size
 
@@ -162,12 +167,6 @@ class Steganographer:
                     if score >= threshold*len(this_pixel):
                         return f"Steganografia detegovana na suradniciach {x}x{y}"
         return "Steganografia nedetegovana"
-
-
-
-    @staticmethod
-    def read_file_binary(filename: str) -> list[bytes]:
-        pass
 
 
 print("Na všetky vstupy a vstupné súbory používajte šifrovanie ASCII (bez diakritiky) bez znaku `;`")
