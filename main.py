@@ -35,8 +35,22 @@ class Steganographer:
     def write_binary(self, binary_data):
         width, height = self.image.size
         total_space = width * height * len("rgb") - self.MAX_HEADER_LENGTH
-        if len(binary_data) > total_space - 1:
-            raise Exception("Not enough space on image")
+        while len(binary_data) > total_space - 1:
+            make_bigger = input("Vlozene data sa nezmestia do aktualneho obrazku. Prajete si zvacsit obrazok na dvojnasobok? Y/N\n")
+            if make_bigger in ["Y", "y", "Yes", "yes", "YES"]:
+                new_image = Image.new(mode="RGB", size=(width*2, height*2))
+                for y in range(height):
+                    for x in range(width):
+                        new_image.putpixel((x * 2 - 1, y * 2 - 1), self.image.getpixel((x, y)))
+                        new_image.putpixel((x * 2, y * 2 - 1), self.image.getpixel((x, y)))
+                        new_image.putpixel((x * 2 - 1, y * 2), self.image.getpixel((x, y)))
+                        new_image.putpixel((x * 2, y * 2), self.image.getpixel((x, y)))
+                self.image = new_image
+                width, height = self.image.size
+                total_space = width * height * len("rgb") - self.MAX_HEADER_LENGTH
+            else:
+                raise Exception("Data sa nezmestia do obrazku a bolo zamietnute zvacsenie obrazku")
+
         binary_data = iter(binary_data)
         finished = False
 
